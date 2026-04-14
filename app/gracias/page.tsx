@@ -11,6 +11,7 @@ export default async function GraciasPage({ searchParams }: PageProps) {
     customerEmail?: string;
     includeBase?: boolean;
     customText?: string;
+    imageUrl?: string;
   } = {};
 
   if (session_id && process.env.STRIPE_SECRET_KEY) {
@@ -21,11 +22,14 @@ export default async function GraciasPage({ searchParams }: PageProps) {
         customerEmail: session.customer_details?.email ?? undefined,
         includeBase: session.metadata?.include_base === "true",
         customText: session.metadata?.custom_text ?? undefined,
+        imageUrl: session.metadata?.image_url || undefined,
       };
     } catch {
       // Session not found or invalid — show generic confirmation
     }
   }
+
+  const orderNumber = session_id ? session_id.slice(-8).toUpperCase() : null;
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "52XXXXXXXXXX";
 
@@ -59,6 +63,16 @@ export default async function GraciasPage({ searchParams }: PageProps) {
           </p>
         </div>
 
+        {/* Número de pedido */}
+        {orderNumber && (
+          <div className="bg-[#141414] border border-[#c8a96e]/30 rounded-xl p-4 flex items-center justify-between">
+            <span className="text-gray-400 text-sm">Número de pedido</span>
+            <span className="text-[#c8a96e] font-mono font-semibold tracking-widest text-sm">
+              #{orderNumber}
+            </span>
+          </div>
+        )}
+
         {orderInfo.customerEmail && (
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 text-left space-y-3">
             <h2 className="text-white font-semibold">Resumen del pedido</h2>
@@ -88,6 +102,25 @@ export default async function GraciasPage({ searchParams }: PageProps) {
                 <span className="text-white">{orderInfo.customerEmail}</span>
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Imagen del cliente */}
+        {orderInfo.imageUrl && (
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 text-left space-y-4">
+            <h3 className="text-white font-semibold">Tu foto para el grabado</h3>
+            <div className="flex justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={orderInfo.imageUrl}
+                alt="Imagen para el grabado"
+                className="rounded-xl object-cover max-h-[300px]"
+                style={{ maxWidth: "300px", width: "100%" }}
+              />
+            </div>
+            <p className="text-gray-400 text-sm text-center">
+              Esta es la imagen que grabaremos en tu cubo
+            </p>
           </div>
         )}
 
